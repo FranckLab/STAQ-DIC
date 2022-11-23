@@ -1,5 +1,6 @@
 # STAQ-DIC
 Spatiotemporally Adaptive Quadtree Mesh (STAQ) Digital Image Correlation 
+--- for solving large deformations near complex geometries and discontinuities
 
 # Publication
 
