@@ -23,10 +23,14 @@ fprintf('------------ Section 1 Done ------------ \n \n')
 
 %% Section 2: Load DIC parameters and set up DIC parameters 
 fprintf('------------ Section 2 Start ------------ \n')
+
 % ====== Read images ====== 
 [file_name,Img,DICpara] = ReadImageQuadtree; % Load DIC raw images
-DICpara.ImgSeqIncUnit = 1; % postprocess every two consecutive frames
-DICpara.winsizeMin = 4; % the minimum element size in the adaptive quadtree mesh
+try
+    disp(['The finest element size in the adaptive quadtree mesh is ', num2str(DICpara.winsizeMin)]);
+catch
+    DICpara.winsizeMin = 8; % Assign the finest element size in the adaptive quadtree mesh
+end
     
 % ====== Load mask files ======
 [mask_file_name,ImgMask] = ReadImageMasks;  
@@ -34,6 +38,8 @@ DICpara.winsizeMin = 4; % the minimum element size in the adaptive quadtree mesh
 % %%%%%% Uncomment lines below to change the DIC computing region (ROI) manually %%%%%%
 % DICpara.gridxROIRange = [gridxROIRange1,gridxROIRange2]; DICpara.gridyROIRange = [Val1, Val2];
 % E.g., gridxROIRange = [224,918]; gridyROIRange = [787,1162];
+% DICpara.gridxyROIRange.gridx = [10, 410];
+% DICpara.gridxyROIRange.gridy = [202, 420];
 
 % ====== Normalize images: fNormalized = (f-f_avg)/(f_std) ======
 [ImgNormalized,DICpara.gridxyROIRange] = funNormalizeImg(Img,DICpara.gridxyROIRange); 
@@ -50,7 +56,7 @@ fprintf('------------ Section 2 Done ------------ \n \n')
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % To solve each frame in an image sequence
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for ImgSeqNum =  2 : length(ImgNormalized) 
+for ImgSeqNum = 2 : length(ImgNormalized) 
 
     close all; 
     DICpara.NewFFTSearch = 1; % Apply the new FFT search since the incremental disp is small between two consecutive frames 
@@ -247,7 +253,7 @@ for ImgSeqNum =  2 : length(ImgNormalized)
     % ======= ALStep 1 Subproblem 2: Global constraint =======
     % ------ Smooth displacements for a better F ------
     DICpara.DispFilterSize=0; DICpara.DispFilterStd=0; DICpara.StrainFilterSize=0; DICpara.StrainFilterStd=0; LevelNo=1;
-    DICpara.DispSmoothness = 0; DICpara.StrainSmoothness = 1e-4;
+    DICpara.DispSmoothness = 0; DICpara.StrainSmoothness = 0;
     if DICpara.DispSmoothness>1e-6, USubpb1 = funSmoothDispQuadtree(USubpb1,DICmesh,DICpara); end
     if DICpara.StrainSmoothness>1e-6, FSubpb1 = funSmoothStrainQuadtree(FSubpb1,DICmesh,DICpara); end
     
@@ -540,14 +546,15 @@ for ImgSeqNum = 2 :  length(ImgNormalized)
     disp_y = rbfinterp([coordCurr(:,1),coordCurr(:,2)]', op2_y );
     
     coordCurr = coordCurr + [disp_x(:), disp_y(:)];
-    U_cum = (coordCurr - coord)'; U_cum = U_cum(:); 
-    ResultDisp{ImgSeqNum-1}.U_cum_store = U_cum; % Store cumulative displacement field
+    U_accum = (coordCurr - coord)'; U_accum = U_accum(:); 
+    ResultDisp{ImgSeqNum-1}.U_accum = U_accum; % Store cumulative displacement field
     
 end
 
-close(hbar);
+close(hbar); 
 %%%%%%% TODO %%%%%%%
-Plotdisp_show( ResultDisp{2-1}.U_cum_store,ResultFEMeshEachFrame{1}.coordinatesFEM,ResultFEMeshEachFrame{1}.elementsFEM(:,1:4),DICpara,'EdgeColor');
+Plotdisp_show( ResultDisp{20-1}.U_accum,ResultFEMeshEachFrame{1}.coordinatesFEM, ...
+       ResultFEMeshEachFrame{1}.elementsFEM(:,1:4),DICpara,'EdgeColor');
 
 
 
@@ -560,7 +567,10 @@ fprintf('------------ Section 8 Start ------------ \n')
 DICpara.um2px = funParaInput('ConvertUnit');
 % ------ Smooth displacements ------
 DICpara.DoYouWantToSmoothOnceMore = 1; % No need to smooth disp fields
-DICpara.smoothness = funParaInput('RegularizationSmoothness'); % Regularization to smooth strain fields           
+DICpara.smoothness = funParaInput('RegularizationSmoothness'); % Regularization to smooth strain fields    
+if DICpara.smoothness == 0
+    DICpara.DoYouWantToSmoothOnceMore = 0;
+end
 % ------ Choose strain computation method ------
 DICpara.MethodToComputeStrain = 2; % funParaInput('StrainMethodOp'); 
 if DICpara.MethodToComputeStrain == 2 % Compute strain method II: Use Plane Fitting method
@@ -594,7 +604,7 @@ end
 % open(v);
 
  
-for ImgSeqNum =  [ 2 :  length(ImgNormalized) ] 
+for ImgSeqNum =  [ 2  : 1 : length(ImgNormalized) ] 
     
     close all; disp(['Current image frame #: ', num2str(ImgSeqNum),'/',num2str(length(ImgNormalized))]);
      
@@ -640,7 +650,7 @@ for ImgSeqNum =  [ 2 :  length(ImgNormalized) ]
     % coordinatesFEM = ResultFEMeshEachFrame{ImgSeqNum-1}.coordinatesFEM;
     % elementsFEM = ResultFEMeshEachFrame{ImgSeqNum-1}.elementsFEM;
     
-    USubpb2 = ResultDisp{ImgSeqNum-1}.U_cum_store;
+    USubpb2 = ResultDisp{ImgSeqNum-1}.U_accum;
     coordinatesFEM = ResultFEMeshEachFrame{1}.coordinatesFEM;
     elementsFEM = ResultFEMeshEachFrame{1}.elementsFEM;
  
@@ -715,20 +725,20 @@ for ImgSeqNum =  [ 2 :  length(ImgNormalized) ]
 
             %%%%%% New codes: applying mask files %%%%%%
             PlotdispQuadtreeMasks(UWorld,coordinatesFEMWorld,elementsFEM(:,1:4),...
-                file_name{1, ImgSeqNum}, ...
-                ImgMask{ ImgSeqNum },DICpara);
+                 file_name{1, ImgSeqNum}, ImgMask{ ImgSeqNum },DICpara);
             
             [strain_exx,strain_exy,strain_eyy,strain_principal_max,strain_principal_min, ...
-               strain_maxshear,strain_vonMises] = PlotstrainQuadtreeMasks(UWorld,FStraintemp, ...
+               strain_maxshear,strain_vonMises] = PlotstrainQuadtreeMasks(UWorld,FStrainWorld, ...
                coordinatesFEMWorld,elementsFEM(:,1:4),file_name{1, ImgSeqNum}, ...
-               ImgMask{ ImgSeqNum },DICpara);
+               ImgMask{ImgSeqNum },DICpara);
+           
            
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO 
 %             PlotdispQuadtreePolarMasks(UWorld,coordinatesFEMWorld,elementsFEM(:,1:4),...
 %                 file_name{1, ImgSeqNum}, ...
-%                 ImgMask{ ImgSeqNum },DICpara,ImgSeqNum);
-            
+%                 ImgMask{ ImgSeqNum },DICpara,ImgSeqNum, Rnew, CircleFitPar);
+%             
 %             [strain_err,strain_ert,strain_ett,strain_principal_max,strain_principal_min, ...
 %                strain_maxshear,strain_vonMises] = PlotstrainQuadtreePolarMasks(UWorld,FStrainWorld, ...
 %                coordinatesFEMWorld,elementsFEM(:,1:4),file_name{1, ImgSeqNum}, ...
@@ -926,5 +936,12 @@ set(gca,'fontsize',20);
 xlabel('Frame #');
 ylabel('Strain');
 legend('exx','exy','eyy');
+
+
+
+%%
+
+
+
 
 

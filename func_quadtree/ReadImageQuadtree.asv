@@ -106,8 +106,8 @@ DICpara.imgBitDepth = 9.5;
 
 % Choose region of interest (ROI)
 fprintf('\n');
-disp('--- Please change the value of "DICpara.imgBitDepth" if your image is too dark/bright ---');
-disp('--- Press "Ctrl + C" to change it in ".\func_quadtree\ReadImageQuadtree.m" line 105 ---');
+disp('--- Please change the value of "DICpara.imgBitDepth" if your image is too dark/bright ---')
+disp('--- Press "Ctrl + C" to change it in ".\func"')
 disp('--- Define ROI corner points at the top-left and the bottom-right ---')
 imshow( (imread(file_name{1})), [0,2^DICpara.imgBitDepth-1]); 
 title('Click top-left and the bottom-right corner points','fontweight','normal','fontsize',16);

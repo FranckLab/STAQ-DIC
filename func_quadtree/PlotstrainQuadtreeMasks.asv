@@ -42,7 +42,7 @@ function [strain_exx,strain_exy,strain_eyy,strain_principal_max,strain_principal
 
 %% Initialization
 warning off; load('./plotFiles/colormap_RdYlBu.mat','cMap');
-% run('./img_Vito/Black_rainbow.m');
+run('./plotFiles/Black_rainbow.m');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% convert pixel unit to the physical world unit %%%%%
@@ -118,13 +118,13 @@ end
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
 hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_exx,'NoEdgeColor');
 set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
-alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
+alpha(h2,OrigDICImgTransparency); colormap(turbo(12)); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
 % colormap(jet); caxis([0,0.5]) % D Sample 
-colormap(jet);   caxis([-0.25,0.25]) % foam
+% colormap(jet);   caxis([-0.25,0.25]) % foam
 % colormap(jet); caxis([-0.004,0]); % Sample 12
-% colormap(jet); caxis([-0.2 ,0.0 ])
+colormap(black_rainbow);    caxis([0,0.05]);
 % colormap(black_rainbow); caxis([-0.004,0.004]);
 ax1.XTick = [100,200,300]; % Unit: px
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,13 +153,13 @@ end
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
 hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_exy,'NoEdgeColor');
 set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
-alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
+alpha(h2,OrigDICImgTransparency); colormap(turbo(12)); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
 % colormap(jet); caxis([-0.08,0.08]) % D Sample 
-colormap(jet); % caxis([-0.06,0.06]) % foam
+% colormap(jet);  caxis([-0.25,0.25]) % foam
 % colormap(jet); caxis([-0.008,0.008]); % Sample 12 
-% colormap(jet); caxis([-0.1,0.1 ])
+colormap(black_rainbow);   caxis([-0.01,0.01])
 %   colormap(black_rainbow); caxis([-0.0018,0.0018]);
 ax1.XTick = [100,200,300]; % Unit: px
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -188,13 +188,13 @@ end
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
 hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_eyy,'NoEdgeColor');
 set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
-alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
+alpha(h2,OrigDICImgTransparency); colormap(turbo(12)); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
 % colormap(jet); caxis([-0.15,0]) % D Sample 
-colormap(jet); % caxis([-0.05,0.2]) % foam
+% colormap(jet);  caxis([-0.25,0.25])% foam
 % colormap(jet); caxis([-0.002,0.017]); % Sample 12 
-% colormap(jet); caxis([0,0.2])
+colormap(black_rainbow); %  caxis([-0.002, 0.004])
 %  colormap(black_rainbow); caxis([-0.0021,0.0021]);
 ax1.XTick = [100,200,300]; % Unit: px
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -30,7 +30,7 @@ try
     InitFFTSearchMethod = DICpara.InitFFTSearchMethod;
     % disp(num2str(InitFFTSearchMethod));
 catch
-    InitFFTSearchMethod = funParaInput('InitFFTSearchMethod');
+    InitFFTSearchMethod = 1; % funParaInput('InitFFTSearchMethod');
 end
 
 
@@ -44,8 +44,10 @@ if (InitFFTSearchMethod == 1) || (InitFFTSearchMethod == 2)
         fprintf('the search zone size until it is larger than the magnitudes of |disp u| and |disp v|. \n');
         fprintf('User could also input [size_x, size_y] to search in a rectangular zone. \n');
         
-        prompt = 'Input here: ';
-        tempSizeOfSearchRegion = input(prompt);
+%        prompt = 'Input here: ';
+%        tempSizeOfSearchRegion = input(prompt);
+       tempSizeOfSearchRegion = 6;
+
         if length(tempSizeOfSearchRegion) == 1, tempSizeOfSearchRegion = tempSizeOfSearchRegion*[1,1]; end
 
 
@@ -89,6 +91,7 @@ if (InitFFTSearchMethod == 1) || (InitFFTSearchMethod == 2)
         a = gca; a.TickLabelInterpreter = 'latex';
         b = colorbar; b.TickLabelInterpreter = 'latex';
         box on; colormap jet;
+        pause(0.5);
  
         figure; surf(v); colorbar;
         title('Displacement v','fontweight','normal')
@@ -100,17 +103,19 @@ if (InitFFTSearchMethod == 1) || (InitFFTSearchMethod == 2)
         a = gca; a.TickLabelInterpreter = 'latex';
         b = colorbar; b.TickLabelInterpreter = 'latex';
         box on; colormap jet;
+        pause(0.5);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        fprintf('--- Are you satisfied with initial guess with current search region? (0-yes; 1-no)? ---  \n')
-        prompt = 'Input here: ';
-        InitialGuessSatisfied = input(prompt);
+%        fprintf('--- Are you satisfied with initial guess with current search region? (0-yes; 1-no)? ---  \n')
+%        prompt = 'Input here: ';
+%        InitialGuessSatisfied = input(prompt);
+     InitialGuessSatisfied = 0;
 
     end
     
     % ======== Find some bad inital guess points ========
     cc.ccThreshold = 1.25; % bad cross-correlation threshold (mean - ccThreshold*stdev for q-factor distribution)
-    qDICOrNot = 0.5;
+    qDICOrNot = 0;
     Thr0 = 100; [u,v,cc] = funRemoveOutliers(u,v,cc,qDICOrNot,Thr0);
 
 %%    
@@ -146,6 +151,7 @@ else % Multigrid search
     a = gca; a.TickLabelInterpreter = 'latex';
     b = colorbar; b.TickLabelInterpreter = 'latex';
     box on; colormap jet;
+    pause(0.5);
     
     
     figure; surf(v); colorbar;
@@ -158,6 +164,7 @@ else % Multigrid search
     a = gca; a.TickLabelInterpreter = 'latex';
     b = colorbar; b.TickLabelInterpreter = 'latex';
     box on; colormap jet;
+    pause(0.5);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end

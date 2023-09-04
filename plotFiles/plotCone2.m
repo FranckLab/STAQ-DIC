@@ -1,14 +1,14 @@
-function hc = plotCone2(x,y,u,v)
+function hc = plotCone2(x,y,u,v,Umag_max_input)
 
 p_sim_pw = [x(:),y(:),zeros(length(x(:)),1)];
 u3_sim = [u(:),v(:),zeros(length(u(:)),1)];
 
 % === Cone plot the solution ===
 ps=p_sim_pw;  
-u_mag = sqrt(u3_sim(:,1).^2 + u3_sim(:,2).^2 + u3_sim(:,3).^2); Umag_max = max(u_mag);
+u_mag = sqrt(u3_sim(:,1).^2 + u3_sim(:,2).^2 + u3_sim(:,3).^2);  Umag_max = max(u_mag);
  %plot3(ps(:,1)+u(:,1),ps(:,2)+u(:,2),ps(:,3)+u(:,3),'k.'); hold on;
  
-hc = coneplot(ps(:,1),ps(:,2),ps(:,3),u3_sim(:,1),u3_sim(:,2),u3_sim(:,3),0.1,'nointerp');  % default size: 0.04
+hc = coneplot(ps(:,1),ps(:,2),ps(:,3),u3_sim(:,1),u3_sim(:,2),u3_sim(:,3),Umag_max/15/Umag_max_input,'nointerp');  % default size: 0.04
 % 
 % try 
 caxis([0,Umag_max]); fvc = repmat(u_mag(:)',[42 1]);

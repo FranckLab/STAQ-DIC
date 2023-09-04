@@ -57,7 +57,13 @@ switch paraName
         % end
         paraInput = ClusterNo;
 
-    
+    case 'winsizeMin'
+        fprintf('\n'); 
+        fprintf('--- What is the finest element size in the adaptive quadtree mesh --- \n');
+        prompt = 'Input here (must be an integer that is a power of 2): ';
+        winsizeMin = input(prompt); paraInput = winsizeMin;
+
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%% Section 8 %%%%% 
     case 'ConvertUnit' % Convert units from pixels to the physical world

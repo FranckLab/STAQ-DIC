@@ -23,7 +23,7 @@ function Plotdisp_showMasks(U,coordinatesFEMWorld,elementsFEM,CurrentImgMask,var
 
 %% Initialization
 warning off;  U = full(U);
-run('./img_Vito/Black_rainbow.m');
+%run('./img_Vito/Black_rainbow.m');
 
 %%%%% Parse Inputs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [DICpara,EdgeColorOrNot] = parseargs(varargin);
@@ -78,7 +78,7 @@ b = colorbar; b.TickLabelInterpreter = 'latex';
 % caxis([-0.1,0.1]) % foam
 % caxis([-0.004,0.004]); % Sample 12
 % caxis([0,0.1]); 
-colormap(black_rainbow_plus); caxis([-0.56,0.56]);
+% colormap(black_rainbow_plus); caxis([-0.56,0.56]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -101,7 +101,7 @@ b = colorbar; b.TickLabelInterpreter = 'latex';
 % caxis([-0.1,0.1]) % foam
 % caxis([-0.004,0.004]); % Sample 12
 % caxis([0,0.1]); 
-colormap(black_rainbow_plus); caxis([-0.12,0.12]);
+% colormap(black_rainbow_plus); caxis([-0.12,0.12]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  

@@ -150,7 +150,7 @@ if numImages > 2
     % ==============================================
     % Decide DIC as accumulative or incremental mode?
     fprintf('--- Choose accumulative or incremental mode ---  \n')
-    fprintf('     0: Accumulative(By default);  \n')
+    fprintf('     0: Cumulative(By default);  \n')
     fprintf('     1: Incremental;  \n')
     prompt = 'Input here: ';
     DICIncOrNot = input(prompt);
@@ -160,24 +160,35 @@ if numImages > 2
             case 0
                 ImgSeqIncUnit = numImages+1;
                 ImgSeqIncROIUpdateOrNot = 1;
+                TrackingMode = 'cumulative';
+
             case 1
-                fprintf('Incremental mode: How many frames to update reference image once? \n');
-                prompt = 'Input here: ';
-                ImgSeqIncUnit = input(prompt);
-                fprintf('Update ROI at the same time of updating reference image? \n');
-                fprintf('    0: Do not update ROI; \n'); 
-                fprintf('    1: Manually(Recommended); \n'); 
-                fprintf('    2: Automatically; \n'); 
-                prompt = 'Input here: ';
-                ImgSeqIncROIUpdateOrNot = input(prompt);
+                %fprintf('Incremental mode: How many frames to update reference image once? \n');
+                %prompt = 'Input here: ';
+                %ImgSeqIncUnit = input(prompt);
+                %fprintf('Update ROI at the same time of updating reference image? \n');
+                %fprintf('    0: Do not update ROI; \n'); 
+                %fprintf('    1: Manually(Recommended); \n'); 
+                %fprintf('    2: Automatically; \n'); 
+                %prompt = 'Input here: ';
+                %ImgSeqIncROIUpdateOrNot = input(prompt);
+
+                ImgSeqIncUnit = 1;
+                ImgSeqIncROIUpdateOrNot = 0;
+                TrackingMode = 'incremental';
+
             otherwise
                 ImgSeqIncUnit = numImages+1;
                 ImgSeqIncROIUpdateOrNot = 1;
+                TrackingMode = 'cumulative';
         end
          
     catch
+
         ImgSeqIncUnit = numImages+1; 
         ImgSeqIncROIUpdateOrNot = 1;
+        TrackingMode = 'cumulative';
+
     end
     
     
@@ -187,6 +198,7 @@ else % Only two frames
     
     ImgSeqIncUnit = numImages+1; 
     ImgSeqIncROIUpdateOrNot = 1;
+    TrackingMode = 'cumulative';
      
 end
 
@@ -194,12 +206,14 @@ DICpara.winsize = winsize;
 DICpara.winstepsize = winstepsize;
 DICpara.gridxyROIRange = gridxy;
 DICpara.LoadImgMethod = LoadImgMethod;
+DICpara.TrackingMode = TrackingMode;
 DICpara.ImgSeqIncUnit = ImgSeqIncUnit;
 DICpara.ImgSeqIncROIUpdateOrNot = ImgSeqIncROIUpdateOrNot;
 DICpara.Subpb2FDOrFEM = Subpb2FDOrFEM;
 DICpara.NewFFTSearch = NewFFTSearch;
 DICpara.ClusterNo = ClusterNo;
 DICpara.ImgSize = size(Img{1});
+DICpara.DIM = 2;
 
 end
 

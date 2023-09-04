@@ -8,19 +8,22 @@
 if DICpara.MethodToSaveFig == 1
     %% jpg
     figure(1); if DICpara.OrigDICImgTransparency == 0, colormap jet; caxis auto; end
-    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_Disp_r'],'-djpeg','-r300');
+    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_Disp_x'],'-djpeg','-r300');
     
     figure(2); if DICpara.OrigDICImgTransparency == 0, colormap jet; caxis auto; end
-    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_Disp_t'],'-djpeg','-r300');
+    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_Disp_y'],'-djpeg','-r300');
     
     figure(3); if DICpara.OrigDICImgTransparency == 0, colormap jet; caxis([-0.025,0.025]); end
-    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_lert'],'-djpeg','-r300');
+    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_exx'],'-djpeg','-r300');
     
     figure(4); if DICpara.OrigDICImgTransparency == 0, colormap jet; caxis([-0.025,0.025]); end
-    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_lett'],'-djpeg','-r300')
+    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_exy'],'-djpeg','-r300')
     
     figure(5); if DICpara.OrigDICImgTransparency == 0, colormap jet; caxis([-0.015,0.015]); end
-    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_lerr'],'-djpeg','-r300')
+    print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_eyy'],'-djpeg','-r300')
+
+%         figure(6); if DICpara.OrigDICImgTransparency == 0, colormap jet; caxis([-0.025,0.025]); end
+%     print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_vonMises'],'-djpeg','-r300');
     
     %figure(6); if DICpara.OrigDICImgTransparency == 0, colormap jet;  caxis([0,0.025]); end
     %print([imgname,'_WS',num2str(DICpara.winsize),'_ST',num2str(DICpara.winstepsize),'_strain_principal_max'],'-djpeg','-r300')

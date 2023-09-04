@@ -84,11 +84,11 @@ if (ClusterNo == 0) || (ClusterNo == 1)
         try 
             [Utemp, Ftemp, ConvItPerEle(tempj), HtempPar(tempj,:)] = funICGNQuadtree(U0(2*tempj-1:2*tempj), ...
                                x0temp,y0temp,Df,ImgRef,ImgDef,winsize,tol,ICGNmethod);
-            disp(['ele ',num2str(tempj),' converge step is ',num2str(ConvItPerEle(tempj)),' (>0-converged; 0-unconverged)']);
+           % disp(['ele ',num2str(tempj),' converge step is ',num2str(ConvItPerEle(tempj)),' (>0-converged; 0-unconverged)']);
             % ------ Store solved deformation gradients ------
             UtempPar(tempj) = Utemp(1); VtempPar(tempj) = Utemp(2); 
             F11tempPar(tempj) = Ftemp(1); F21tempPar(tempj) = Ftemp(2); F12tempPar(tempj) = Ftemp(3); F22tempPar(tempj) = Ftemp(4);
-            waitbar(tempj/(size(coordinatesFEM,1)));
+           % waitbar(tempj/(size(coordinatesFEM,1)));
         catch
            ConvItPerEle(tempj) = -1;
            UtempPar(tempj) = nan; VtempPar(tempj) = nan;

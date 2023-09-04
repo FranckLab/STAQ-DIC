@@ -154,7 +154,7 @@ U0Quadtree = 0*coordinatesFEMQuadtree(:);
 
 dilatedI = ( imgaussfilt(double(Df.ImgRefMask),1) );
 dilatedI = logical( dilatedI > 0.01);
-cc = bwconncomp(dilatedI,8);
+cc = bwconncomp(dilatedI, 4);
 indPxAll = sub2ind( Df.imgSize, coordinatesFEMQuadtree(:,1), coordinatesFEMQuadtree(:,2) );
 indPxNotNanAll = sub2ind( Df.imgSize, DICmesh.coordinatesFEM(U0NotNanInd,1), DICmesh.coordinatesFEM(U0NotNanInd,2) );
 stats = regionprops(cc,'Area','PixelList');
@@ -202,11 +202,11 @@ DICmesh.elementsFEM = elementsFEMQuadtree;
 DICmesh.irregular = irregular;
 DICmesh.coordinatesFEMWorld = [DICmesh.coordinatesFEM(:,1),size(DICpara.ImgRefMask,2)+1-DICmesh.coordinatesFEM(:,2)];
  
-
-ResultFEMesh{1+floor(fNormalizedNewIndex/DICpara.ImgSeqIncUnit)} = ... % To save first mesh info
-    struct( 'coordinatesFEM',DICmesh.coordinatesFEM,'elementsFEM',DICmesh.elementsFEM, ...
-    'winsize',DICpara.winsize,'winstepsize',DICpara.winstepsize,'gridxyROIRange',DICpara.gridxyROIRange, ...
-    'coordinatesFEMWorld',DICmesh.coordinatesFEMWorld,'elementMinSize',DICmesh.elementMinSize,'markCoordHoleEdge',DICmesh.markCoordHoleEdge);
+% 
+% ResultFEMesh{1+floor(fNormalizedNewIndex/DICpara.ImgSeqIncUnit)} = ... % To save first mesh info
+%     struct( 'coordinatesFEM',DICmesh.coordinatesFEM,'elementsFEM',DICmesh.elementsFEM, ...
+%     'winsize',DICpara.winsize,'winstepsize',DICpara.winstepsize,'gridxyROIRange',DICpara.gridxyROIRange, ...
+%     'coordinatesFEMWorld',DICmesh.coordinatesFEMWorld,'elementMinSize',DICmesh.elementMinSize,'markCoordHoleEdge',DICmesh.markCoordHoleEdge);
 
  
 

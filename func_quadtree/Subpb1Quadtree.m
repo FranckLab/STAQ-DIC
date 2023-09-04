@@ -89,7 +89,7 @@ if (ClusterNo == 0) || (ClusterNo == 1)
                 HLocal,beta,mu,udual(4*tempj-3:4*tempj),vdual(2*tempj-1:2*tempj),...
                 UOld(2*tempj-1:2*tempj),FOld(4*tempj-3:4*tempj),tol,ICGNmethod);
             
-            disp(['ele ',num2str(tempj),' converge or not is ',num2str(ConvItPerEle(tempj,:)),' (1-converged; 0-unconverged)']);
+            % disp(['ele ',num2str(tempj),' converge or not is ',num2str(ConvItPerEle(tempj,:)),' (1-converged; 0-unconverged)']);
             
             % Store solved deformation gradients
             UPar{1}(tempj) = Utemp(1); UPar{2}(tempj) = Utemp(2);
@@ -105,7 +105,7 @@ if (ClusterNo == 0) || (ClusterNo == 1)
             HPar{15}(tempj) = Htemp(18); HPar{16}(tempj) = Htemp(22); HPar{17}(tempj) = Htemp(23); HPar{18}(tempj) = Htemp(24);
             HPar{19}(tempj) = Htemp(29); HPar{20}(tempj) = Htemp(30); HPar{21}(tempj) = Htemp(36);
         end
-        waitbar(tempj/(size(coordinatesFEM,1)));
+        % waitbar(tempj/(size(coordinatesFEM,1)));
     end
     close(h); ALSub1Time = toc;
     

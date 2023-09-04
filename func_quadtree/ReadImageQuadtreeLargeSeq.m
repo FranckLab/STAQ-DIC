@@ -1,5 +1,5 @@
-function [file_name,Img,DICpara] = ReadImageQuadtree(varargin)
-%FUNCTION [file_name,Img,DICpara] = ReadImageQuadtree(varargin)
+function [file_name,Img,DICpara] = ReadImageQuadtreeLargeSeq(varargin)
+%FUNCTION [file_name,Img,DICpara] = ReadImageQuadtreeLargeSeq(varargin)
 % ----------------------------------------------
 %   This script is to load DIC images 
 %   Images can be loaded by:
@@ -68,7 +68,8 @@ end
 % ==============================================
 % The following codes only consider two images comparasion
 numImages = size(file_name,2);
-for i = 1:numImages
+
+for i = 1  %Only read the first frame
     Img{i} = imread(file_name{1,i});
     % Change color RGB images to grayscale images
     [~, ~, numberOfColorChannels] = size(Img{i});
@@ -100,16 +101,10 @@ end
 
 % ==============================================
 % Decide DIC subset parameters
-imgInfo = imfinfo(file_name{1});
-DICpara.imgBitDepth = imgInfo.BitDepth;
-DICpara.imgBitDepth = 9.5;
-
 % Choose region of interest (ROI)
 fprintf('\n');
-disp('--- Please change the value of "DICpara.imgBitDepth" if your image is too dark/bright ---');
-disp('--- Press "Ctrl + C" to change it in ".\func_quadtree\ReadImageQuadtree.m" line 105 ---');
 disp('--- Define ROI corner points at the top-left and the bottom-right ---')
-imshow( (imread(file_name{1})), [0,2^DICpara.imgBitDepth-1]); 
+imshow( (imread(file_name{1}))); 
 title('Click top-left and the bottom-right corner points','fontweight','normal','fontsize',16);
 
 gridx = zeros(1,2); gridy = zeros(1,2);
@@ -137,7 +132,7 @@ winstepsize = input(prompt);
 % ==============================================
 % Subproblem 2 solver: finite difference or finite element
 Subpb2FDOrFEM = 0; % By default initialize parameters
-Subpb2FDOrFEM = 1; % funParaInput('Subpb2FDOrFEM'); % Subproblem 2 using finite difference or fem?
+Subpb2FDOrFEM = 1; % funParaInput('Subpb2FDOrFEM'); % Subproblem 2 using finite difference or fem? % Only FEM method is implemented for quadtree mesh
 
 % ==============================================
 % Parallel cluster #
@@ -150,7 +145,6 @@ if numImages > 2
     
     % ==============================================
     % DIC initial guess 
-    
     NewFFTSearch = funParaInput('NewFFTSearch'); % Use last frame as init guess or not
     
     % ==============================================
@@ -165,26 +159,34 @@ if numImages > 2
     try
         switch DICIncOrNot
             case 0
-                ImgSeqIncUnit = numImages+1;
+                ImgSeqIncUnit = numImages + 1;
                 ImgSeqIncROIUpdateOrNot = 1;
+                 TrackingMode = 'cumulative';
+
             case 1
-                fprintf('Incremental mode: How many frames to update reference image once? \n');
-                prompt = 'Input here: ';
-                ImgSeqIncUnit = input(prompt);
-                fprintf('Update ROI at the same time of updating reference image? \n');
-                fprintf('    0: Do not update ROI; \n'); 
-                fprintf('    1: Manually(Recommended); \n'); 
-                fprintf('    2: Automatically; \n'); 
-                prompt = 'Input here: ';
-                ImgSeqIncROIUpdateOrNot = input(prompt);
+                % fprintf('Incremental mode: How many frames to update reference image once? \n');
+                % prompt = 'Input here: ';
+                % ImgSeqIncUnit = input(prompt);
+                % fprintf('Update ROI at the same time of updating reference image? \n');
+                % fprintf('    0: Do not update ROI; \n'); 
+                % fprintf('    1: Manually(Recommended); \n'); 
+                % fprintf('    2: Automatically; \n'); 
+                % prompt = 'Input here: ';
+                % ImgSeqIncROIUpdateOrNot = input(prompt);
+                ImgSeqIncUnit = 1;
+                ImgSeqIncROIUpdateOrNot = 0;
+                TrackingMode = 'incremental';
+
             otherwise
-                ImgSeqIncUnit = numImages+1;
+                ImgSeqIncUnit = numImages + 1;
                 ImgSeqIncROIUpdateOrNot = 1;
+                TrackingMode = 'cumulative';
         end
          
     catch
-        ImgSeqIncUnit = numImages+1; 
+        ImgSeqIncUnit = numImages + 1; 
         ImgSeqIncROIUpdateOrNot = 1;
+        TrackingMode = 'cumulative';
     end
     
     
@@ -192,8 +194,9 @@ if numImages > 2
 % ================================    
 else % Only two frames
     
-    ImgSeqIncUnit = numImages+1; 
+    ImgSeqIncUnit = numImages + 1; 
     ImgSeqIncROIUpdateOrNot = 1;
+    TrackingMode = 'cumulative';
      
 end
 
@@ -201,19 +204,14 @@ DICpara.winsize = winsize;
 DICpara.winstepsize = winstepsize;
 DICpara.gridxyROIRange = gridxy;
 DICpara.LoadImgMethod = LoadImgMethod;
+DICpara.TrackingMode = TrackingMode;
 DICpara.ImgSeqIncUnit = ImgSeqIncUnit;
 DICpara.ImgSeqIncROIUpdateOrNot = ImgSeqIncROIUpdateOrNot;
 DICpara.Subpb2FDOrFEM = Subpb2FDOrFEM;
 DICpara.NewFFTSearch = NewFFTSearch;
 DICpara.ClusterNo = ClusterNo;
 DICpara.ImgSize = size(Img{1});
-DICpara.ImgSeqIncUnit = 1; % postprocess every two consecutive frames
- 
-% ==============================================
-% Parallel cluster #
-winsizeMin = funParaInput('winsizeMin'); % Assign the finest element size in the quadtree mesh
-DICpara.winsizeMin = winsizeMin;
- 
+DICpara.DIM = 2;
 
 
 clear ImgRef gridx gridy ImgRefGaussFilt ImgRefMaskThresholdInside ImgRefMaskThresholdOutside ...
@@ -221,3 +219,5 @@ tempi tempxx tempyy dist2HoleCenter row col removeobjradius  ImgRefMasktemp
 
 
 end
+
+
