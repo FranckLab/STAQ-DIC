@@ -1,6 +1,5 @@
-# STAQ-DIC
-Spatiotemporally Adaptive Quadtree Mesh (STAQ) Digital Image Correlation 
---- for solving large deformations near complex geometries and discontinuities
+# Introduction
+STAQ-DIC is Spatiotemporally Adaptive Quadtree Mesh (STAQ) Digital Image Correlation method which is developed for solving large deformations near complex geometries and discontinuities in an automatic manner
 
 # Manual
 A code documentation will be updated soon. If you want to receive any guidance or need help, feel free to contact us at  jin.yang@austin.utexas.edu  or  aldicdvc@gmail.com. 
