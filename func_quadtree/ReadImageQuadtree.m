@@ -207,7 +207,7 @@ DICpara.Subpb2FDOrFEM = Subpb2FDOrFEM;
 DICpara.NewFFTSearch = NewFFTSearch;
 DICpara.ClusterNo = ClusterNo;
 DICpara.ImgSize = size(Img{1});
-DICpara.ImgSeqIncUnit = 1; % postprocess every two consecutive frames
+% DICpara.ImgSeqIncUnit = 1; % postprocess every two consecutive frames
  
 % ==============================================
 % Parallel cluster #
