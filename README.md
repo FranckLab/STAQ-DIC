@@ -5,7 +5,7 @@ STAQ-DIC is Spatiotemporally Adaptive Quadtree Mesh (STAQ) Digital Image Correla
 
 
 # Manual
-A code documentation will be updated soon. If you want to receive any guidance or need help, feel free to contact us at  jin.yang@austin.utexas.edu  or  aldicdvc@gmail.com. 
+A code documentation will be updated soon. If you want to receive any guidance or need help, feel free to contact us at aldicdvc@gmail.com, Dr. Jin Yang (jin.yang@austin.utexas.edu)  or  Dr. Christian Franck (cfranck@wisc.edu).
 
 # Publication & Citation
 The original paper that introduces our new method is here: [https://link.springer.com/content/pdf/10.1007/s11340-022-00872-4.pdf](https://link.springer.com/article/10.1007/s11340-022-00872-4)
