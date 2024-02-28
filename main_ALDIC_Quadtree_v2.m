@@ -18,7 +18,6 @@ try mex -O ba_interp2.cpp; catch; end  % mex set up ba_interp2.cpp script
 addpath("./func",'./plotFiles','./func_quadtree','./plotFiles/export_fig-d966721/', ...
     './func_quadtree/refinement','./func_quadtree/rbfinterp'); 
 addpath('./Images_Quadtree_demo/Images_Sample12'); % TODO: addpath("./YOUR IMAGE FOLDER"); 
-addpath('./rbfinterp');
 fprintf('------------ Section 1 Done ------------ \n \n')
 
 
@@ -128,6 +127,7 @@ for ImgSeqNum = 2 : length(ImgNormalized)
 
         % ====== DIC uniform FE-mesh set up ======
         [DICmesh] = MeshSetUp(x0temp,y0temp,DICpara); % clear x0temp y0temp;
+
         % ====== Initial Value ======
         U0 = Init(u,v,cc.max,DICmesh.x0,DICmesh.y0,0);  
          

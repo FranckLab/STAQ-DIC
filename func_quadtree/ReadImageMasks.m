@@ -43,7 +43,7 @@ switch LoadImgMethod
         mask_file_name = struct2cell(mask_file_name);
     case 1
         % ==============================================
-        fprintf('What is prefix of DIC images? E.g. img_0*.tif.   \n')
+        fprintf('What is prefix of DIC image mask files? E.g. img_0*.tif.   \n')
         prompt = 'Input here: ';
         mask_file_name = input(prompt,'s');
         [~,imgname,imgext] = fileparts(mask_file_name);
