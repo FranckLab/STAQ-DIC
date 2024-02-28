@@ -31,7 +31,7 @@ close all; [file_name,Img,DICpara] = ReadImageQuadtree; % Load DIC raw images
 
 % %%%%%% Uncomment lines below to change the DIC computing region (ROI) manually %%%%%%
 % DICpara.gridxROIRange = [gridxROIRange1,gridxROIRange2]; DICpara.gridyROIRange = [Val1, Val2];
-% E.g., gridxROIRange = [224,918]; gridyROIRange = [787,1162];
+% E.g., DICpara.gridxROIRange.gridx = [224,918]; DICpara.gridxROIRange.gridx = [787,1162];
 
 % ====== Normalize images: fNormalized = (f-f_avg)/(f_std) ======
 [ImgNormalized,DICpara.gridxyROIRange] = funNormalizeImg(Img,DICpara.gridxyROIRange); 
@@ -763,7 +763,7 @@ v = VideoWriter('video_mesh.avi');
 v.FrameRate = 10;
 open(v);
 figure,
-for ImgSeqNum = 2 % : (1+size(ResultDisp,1))
+for ImgSeqNum = 2  : (1+size(ResultDisp,1))
     
     clf; patch('Faces', DICmesh.elementsFEM(:,1:4), 'Vertices', DICmesh.coordinatesFEMWorld + ...
         [ResultDisp{ImgSeqNum-1}.U(1:2:end), -ResultDisp{ImgSeqNum-1}.U(2:2:end)], 'Facecolor','none','linewidth',1)
