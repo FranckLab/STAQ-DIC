@@ -1,25 +1,16 @@
-function [x2,y2,disp_u,disp_v,dudx,dvdx,dudy,dvdy,strain_exx,strain_exy,strain_eyy, ...
-    strain_principal_max,strain_principal_min,strain_maxshear,strain_vonMises] = Plotstrain( ...
-    U,F,Rad,x0,y0,sizeOfImg,CurrentImg,DICpara)
-%PLOTSTRAIN: to compute and plot DIC solved strain fields on the original DIC images
-%   [x2,y2,disp_u,disp_v,dudx,dvdx,dudy,dvdy,strain_exx,strain_exy,strain_eyy, ...
-%   strain_principal_max,strain_principal_min,strain_maxshear,strain_vonMises] = Plotstrain( ...
-%   U,Rad,F,x0,y0,sizeOfImg,CurrentImg,DICpara)
+function [strain_exx,strain_exy,strain_eyy,strain_principal_max,strain_principal_min, ...
+    strain_maxshear,strain_vonMises] = PlotstrainQuadtree(U,F,coordinatesFEM,elementsFEM,CurrentImg,DICpara)
+%PLOTSTRAINQUADTREE: to plot DIC solved strain fields on a quadtree mesh 
+% and overlaid with the original DIC images 
+%   [strain_exx,strain_exy,strain_eyy,strain_principal_max,strain_principal_min, ...
+%    strain_maxshear,strain_vonMises] = PlotstrainQuadtree(U,F,coordinatesFEMWorld,elementsFEM,CurrentImg,DICpara)
+% ----------------------------------------------
 %
-%   INPUT: U                DIC solved displacement fields
-%          F                DIC solved deformation gradient tensor
-%          Rad              Parameter used to compute the final F. If we use the direct
-%                           output from the ALDIC code, Rad=0. If we apply a finite  
-%                           difference or plane fitting of the U to compute the F, Rad>0.
-%          x0,y0            x and y coordinates of each points on the image domain
-%          SizeOfImg        Size of the DIC raw image
-%          CurrentImg       File name of current deformed image
-%          DICpara          DIC para in the ALDIC code
+%   INPUT: F                    DIC solved deformation gradient tensor
+%          coordinatesFE        FE mesh coordinates
+%          elementsFEM          FE mesh elements
 %
-%   OUTPUT: x2,y2                   x- and y-coordinates of points whose strain values are computed
-%           disp_u,disp_v           Interpolated dispu and dispv at points {x2,y2}
-%           dudx,dvdx,dudy,dvdy     E.g., dudx = d(disp_u)/dx at points {x2,y2}
-%           strain_exx              strain xx-compoent
+%   OUTPUT: strain_exx              strain xx-compoent
 %           strain_exy              strain xy-compoent
 %           strain_eyy              strain yy-compoent
 %           strain_principal_max    max principal strain on the xy-plane
@@ -36,13 +27,20 @@ function [x2,y2,disp_u,disp_v,dudx,dvdx,dudy,dvdy,strain_exx,strain_exy,strain_e
 %       6) max shear strain on the xy-plane
 %       7) equivalent von Mises strain
 %
-%   TODO: users could change caxis range based on their own choices.
-%
-% Author: Jin Yang  (jyang526@wisc.edu)
-% Last date modified: 2020.12.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ----------------------------------------------
+% Reference
+% [1] RegularizeNd. Matlab File Exchange open source. 
+% https://www.mathworks.com/matlabcentral/fileexchange/61436-regularizend
+% [2] Gridfit. Matlab File Exchange open source. 
+% https://www.mathworks.com/matlabcentral/fileexchange/8998-surface-fitting-using-gridfit
+% ----------------------------------------------
+% Author: Jin Yang.  
+% Contact and support: jyang526@wisc.edu -or- aldicdvc@gmail.com
+% Last time updated: 2020.12
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%
+
+%% Initialization
 warning off; load('./plotFiles/colormap_RdYlBu.mat','cMap');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,41 +51,18 @@ um2px = DICpara.um2px;
 OrigDICImgTransparency = DICpara.OrigDICImgTransparency; % Original raw DIC image transparency
 Image2PlotResults = DICpara.Image2PlotResults; % Choose image to plot over (first only, second and next images)
 
+disp_u = U(1:2:end); disp_v = U(2:2:end);
+coordinatesFEMWorldDef = [coordinatesFEM(:,1)+Image2PlotResults*disp_u, coordinatesFEM(:,2)+Image2PlotResults*disp_v];
+
+
 %% Compute strain components
 
-x = x0(1+Rad:end-Rad,1+Rad:end-Rad); 
-y = y0(1+Rad:end-Rad,1+Rad:end-Rad);
-
-M = size(x,1); N = size(x,2);
 u_x = F(1:4:end); v_x = F(2:4:end);
 u_y = F(3:4:end); v_y = F(4:4:end);
- 
-u_x = reshape(u_x,M,N); v_x = reshape(v_x,M,N);
-u_y = reshape(u_y,M,N); v_y = reshape(v_y,M,N);
 
-u = U(1:2:end); v = U(2:2:end);
-u0 = reshape(u,M+2*Rad,N+2*Rad); v0 = reshape(v,M+2*Rad,N+2*Rad);
-u = u0(1+Rad:end-Rad,1+Rad:end-Rad); v = v0(1+Rad:end-Rad,1+Rad:end-Rad);
-
-% imagesc([x(1,1) x(end,1)], [y(1,1) y(1,end)], flipud(g)); hold on;
-if M < 9, x2 = x(:,1)'; else x2 = linspace(x(1,1),x(end,1),4*(length(x(:,1))-1)+1); end
-if N < 9, y2 = y(1,:);  else y2 = linspace(y(1,1),y(1,end),4*(length(y(1,:))-1)+1); end
-
-
-%% Compute displacement components to manipulate the reference image
-disp_u = gridfit(reshape(x,M*N,1),reshape(y,M*N,1),reshape(u,M*N,1),x2,y2);
-disp_v = gridfit(reshape(x,M*N,1),reshape(y,M*N,1),reshape(v,M*N,1),x2,y2);
- 
-
-%% Compute strain components
-dudx = gridfit(reshape(x,M*N,1),reshape(y,M*N,1),reshape(u_x,M*N,1),x2,y2);
-dvdx = gridfit(reshape(x,M*N,1),reshape(y,M*N,1),reshape(v_x,M*N,1),x2,y2);
-dudy = gridfit(reshape(x,M*N,1),reshape(y,M*N,1),reshape(u_y,M*N,1),x2,y2);
-dvdy = gridfit(reshape(x,M*N,1),reshape(y,M*N,1),reshape(v_y,M*N,1),x2,y2);
-
-strain_exx = dudx;
-strain_exy = 0.5*(dvdx + dudy);
-strain_eyy = dvdy;
+strain_exx = u_x; 
+strain_exy = 0.5*(v_x+u_y);
+strain_eyy = v_y;
 
 strain_maxshear = sqrt((0.5*(strain_exx-strain_eyy)).^2 + strain_exy.^2);
 % Principal strain
@@ -102,9 +77,6 @@ strain_vonMises = 2/3 * sqrt(strain_principal_max.^2 + strain_principal_min.^2 -
 %                                   - strain_principal_max.*strain_principal_min );"
 % Link: https://help.csiamerica.com/help/sap2000/26/26.0.0/SAP2000/WebHelp/Menus/Display/Show_Forces_Stresses/Von_Mises_Stress.htm
 
- 
-% Please don't delete this line, to deal with the image and physical world coordinates       
-[x2,y2]=ndgrid(x2,y2); x2=x2'; y2=y2';
 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,13 +88,14 @@ catch h1=surf( flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_exx, 'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  % set(gca,'ydir','normal');
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight;  colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_exx,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); %caxis([-0.025,0.025]); 
+% colormap(jet); caxis([0,0.5]) % D Sample 
+% colormap(jet); caxis([-0.1,0.02]) % foam
+% colormap(jet); caxis([-0.004,0]); % Sample 12
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 linkaxes([ax1,ax2]);  % Link axes together
@@ -137,6 +110,7 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpre
 
 
 
+ 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 2) Strain exy ======
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,15 +120,16 @@ catch h1=surf( flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_exy,'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  caxis auto; % set(gca,'ydir','normal');
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight; colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_exy,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); caxis([-0.008,0.008]);  
+% colormap(jet); caxis([-0.08,0.08]) % D Sample 
+% colormap(jet); caxis([-0.06,0.06]) % foam
+% colormap(jet); caxis([-0.008,0.008]); % Sample 12 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
 linkaxes([ax1,ax2]);  % Link axes together
 ax2.Visible = 'off'; ax2.XTick = []; ax2.YTick = []; % Hide the top axes
 colormap(ax1,'gray'); % Give each one its own colormap
@@ -167,6 +142,7 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpre
 
 
 
+ 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 3) Strain eyy ======
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,14 +152,14 @@ catch h1=surf( flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_eyy,'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  caxis auto; % set(gca,'ydir','normal');
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight;  colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_eyy,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); caxis([-0.002,0.014]);
-% caxis([-0.55,0]);
+% colormap(jet); caxis([-0.15,0]) % D Sample 
+% colormap(jet); caxis([-0.05,0.2]) % foam
+% colormap(jet); caxis([-0.002,0.017]); % Sample 12 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 linkaxes([ax1,ax2]);  % Link axes together
@@ -197,22 +173,26 @@ yticklabels(ax1, num2cell(round(um2px*ax1.YTick*100)/100, length(ax1.YTick) )' )
 cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpreter = 'latex';
 
  
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 4) Strain e_principal_max ======
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fig1=figure; ax1=axes; 
 try h1=imshow( flipud(imread(CurrentImg)),'InitialMagnification','fit');
 catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none');
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_principal_max,'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  caxis auto; % set(gca,'ydir','normal');
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight;  colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_principal_max,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); % caxis([-0.002,0.014]) % caxis([-0.025,0.025]); 
+% colormap(jet);  caxis auto; % D Sample 
+% colormap(jet); caxis auto % foam
+% colormap(jet); caxis([0,0.02]); % Sample 12 
+colormap(jet); caxis([-0.1,0.1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 linkaxes([ax1,ax2]);  % Link axes together
@@ -227,6 +207,7 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpre
 
 
 
+  
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 5) Strain e_principal_min ======
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -236,13 +217,15 @@ catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','non
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_principal_min,'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  caxis auto; % set(gca,'ydir','normal');
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight; colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_principal_min,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); % caxis([-0.025,0.025]); 
+% colormap(jet);  caxis auto; % D Sample 
+% colormap(jet); caxis auto % foam
+% colormap(jet); caxis([-0.008,0]); % Sample 12 
+colormap(jet); caxis([-0.15,0.0]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 linkaxes([ax1,ax2]);  % Link axes together
@@ -257,22 +240,25 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpre
 
 
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 6) Strain e_max_shear ======
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fig1=figure; ax1=axes; 
 try h1=imshow( flipud(imread(CurrentImg)),'InitialMagnification','fit');
 catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none');
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_maxshear,'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  caxis auto; % set(gca,'ydir','normal');
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight; colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_maxshear,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); caxis([-0.0,0.01]); % caxis([-0.025,0.025]); 
+% colormap(jet);  caxis auto; % D Sample 
+% colormap(jet); caxis auto % foam
+% colormap(jet); caxis([0,0.011]); % Sample 12 
+colormap(jet); caxis([0,0.1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 linkaxes([ax1,ax2]);  % Link axes together
@@ -286,7 +272,7 @@ yticklabels(ax1, num2cell(round(um2px*ax1.YTick*100)/100, length(ax1.YTick) )' )
 cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpreter = 'latex';
 
  
-
+ 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 7) von Mises equivalent strain ======
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -296,13 +282,15 @@ catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','non
 end
 
 axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2);  set(gca,'ydir','normal');
-hold on; ax2=axes; h2=surf( (x2+Image2PlotResults*disp_u)/um2px, ...
-    sizeOfImg(2)+1-(y2-Image2PlotResults*disp_v)/um2px, strain_vonMises,'EdgeColor','none','LineStyle','none');
-set(gca,'fontSize',18); view(2); box on;  caxis auto;  
-alpha(h2,OrigDICImgTransparency);  axis equal;  axis tight;  colormap(cMap);
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_vonMises,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% colormap(jet); caxis([-0.0,0.022]) % caxis([-0.025,0.025]); 
+% colormap(jet);  caxis auto; % D Sample 
+% colormap(jet); caxis auto % foam
+% colormap(jet); caxis([0,0.025]); % Sample 12 
+colormap(jet); caxis([0,0.25]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 linkaxes([ax1,ax2]);  % Link axes together
@@ -315,7 +303,9 @@ xticklabels(ax1, num2cell(round(um2px*ax1.XTick*100)/100, length(ax1.XTick) )' )
 yticklabels(ax1, num2cell(round(um2px*ax1.YTick*100)/100, length(ax1.YTick) )' );
 cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpreter = 'latex';
 
- 
+
+
+
 
 end
  
