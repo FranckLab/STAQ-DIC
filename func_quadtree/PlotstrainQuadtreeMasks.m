@@ -104,8 +104,8 @@ strain_principal_max = 0.5*(strain_exx+strain_eyy) + strain_maxshear;
 strain_principal_min = 0.5*(strain_exx+strain_eyy) - strain_maxshear;
 % equivalent von Mises strain
 strain_vonMises = sqrt(strain_principal_max.^2 + strain_principal_min.^2 - ...
-             strain_principal_max.*strain_principal_min + 3*strain_maxshear.^2);
-
+             strain_principal_max.*strain_principal_min );
+% there was a mistake before:   previous  "+ 3*strain_maxshear.^2" term should not be included here.
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 1) Strain exx ======
@@ -125,7 +125,7 @@ alpha(h2,OrigDICImgTransparency); colormap(turbo(128)); caxis auto;
 % colormap(jet); caxis([0,0.5]) % D Sample 
 % colormap(jet);   caxis([-0.25,0.25]) % foam
 % colormap(jet); caxis([-0.004,0]); % Sample 12
-colormap(black_rainbow_plus);    caxis([-0.15 0.15]);
+colormap(black_rainbow_plus);   caxis([-0.15 0.15]);
 % colormap(black_rainbow); caxis([-0.004,0.004]);
 % ax1.XTick = [100,200,300]; % Unit: px
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -197,7 +197,7 @@ alpha(h2,OrigDICImgTransparency); colormap(turbo(128)); caxis auto;
 % colormap(jet); caxis([-0.15,0]) % D Sample 
 % colormap(jet);  caxis([-0.25,0.25])% foam
 % colormap(jet); caxis([-0.002,0.017]); % Sample 12 
-colormap(black_rainbow_plus);  caxis([-0.15 0.15]);
+colormap(black_rainbow_plus);   caxis([-0.15 0.15]);
 %  colormap(black_rainbow); caxis([-0.0021,0.0021]);
 % ax1.XTick = [100,200,300]; % Unit: px
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -280,10 +280,10 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11+.128 .03 .557 ]); %cb2.TickLabelI
 % 
 % 
 % 
-%  
-% % %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % % ====== 6) Strain e_max_shear ======
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % ====== 6) Strain e_max_shear ======
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % fig1=figure; ax1=axes; 
 % try h1=imshow( flipud(imread(CurrentImg)),'InitialMagnification','fit');
 % catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none');
@@ -292,11 +292,11 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11+.128 .03 .557 ]); %cb2.TickLabelI
 % axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2); set(gca,'ydir','normal');
 % hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_maxshear,'NoEdgeColor');
 % set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
-% alpha(h2,OrigDICImgTransparency); colormap(jet); caxis auto;
+% alpha(h2,OrigDICImgTransparency); % colormap(jet); caxis auto;
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %%%%%% TODO: manually modify colormap and caxis %%%%%%
 % % colormap(jet);  caxis auto; % D Sample 
-% colormap(jet); caxis auto % foam
+% colormap(turbo); caxis auto % foam
 % % colormap(jet); caxis([0,0.011]); % Sample 12 
 % % colormap(jet); caxis([0,0.2])
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -310,39 +310,40 @@ cb2 = colorbar('Position',[.17+0.685+0.012 .11+.128 .03 .557 ]); %cb2.TickLabelI
 % xticklabels(ax1, num2cell(round(um2px*ax1.XTick*10)/10, length(ax1.XTick) )' );
 % yticklabels(ax1, num2cell(round(um2px*ax1.YTick*10)/10, length(ax1.YTick) )' );
 % cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpreter = 'latex';
-% 
-%  
+
+
  
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ====== 7) von Mises equivalent strain ======
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% fig1=figure; ax1=axes; 
-% try h1=imshow( flipud(imread(CurrentImg)),'InitialMagnification','fit');
-% catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none');
-% end
-% 
-% axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2);  set(gca,'ydir','normal');
-% hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_vonMises,'NoEdgeColor');
-% set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
-% alpha(h2,OrigDICImgTransparency); colormap(turbo(12)); caxis auto;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%% TODO: manually modify colormap and caxis %%%%%%
-% % colormap(jet);  caxis auto; % D Sample 
-% %colormap(jet); caxis([0,0.5]); % foam
-% % colormap(jet); caxis([0,0.025]); % Sample 12 
-%  caxis([0,0.5])
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% linkaxes([ax1,ax2]);  % Link axes together
-% ax2.Visible = 'off'; ax2.XTick = []; ax2.YTick = []; % Hide the top axes
-% colormap(ax1,'gray'); % Give each one its own colormap
-% set([ax1,ax2],'Position',[.17 .11 .685 .815]);  
-% ax1.Visible = 'on';% ax1.TickLabelInterpreter = 'latex'; 
-% %%%%% convert pixel unit to the physical world unit %%%%%
-% xticklabels(ax1, num2cell(round(um2px*ax1.XTick*10)/10, length(ax1.XTick) )' );
-% yticklabels(ax1, num2cell(round(um2px*ax1.YTick*10)/10, length(ax1.YTick) )' );
-% cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .557]); %cb2.TickLabelInterpreter = 'latex';
-% 
+fig1=figure; ax1=axes; 
+try h1=imshow( flipud(imread(CurrentImg)),'InitialMagnification','fit');
+catch h1=surf(  flipud( imread(CurrentImg) ),'EdgeColor','none','LineStyle','none');
+end
+
+axis on; axis equal; axis tight; box on; set(gca,'fontSize',18); view(2);  set(gca,'ydir','normal');
+hold on; ax2=axes; h2=show([],elementsFEM(:,1:4),coordinatesFEMWorldDef/um2px,strain_vonMises,'NoEdgeColor');
+set(gca,'fontSize',18); view(2); box on; axis equal;  axis tight;   
+alpha(h2,OrigDICImgTransparency); colormap(turbo(128)); caxis auto;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% TODO: manually modify colormap and caxis %%%%%%
+% colormap(jet);  caxis auto; % D Sample 
+%colormap(jet); caxis([0,0.5]); % foam
+% colormap(jet); caxis([0,0.025]); % Sample 12 
+ caxis([0, 0.25]);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+linkaxes([ax1,ax2]);  % Link axes together
+ax2.Visible = 'off'; ax2.XTick = []; ax2.YTick = []; % Hide the top axes
+colormap(ax1,'gray'); % Give each one its own colormap
+set([ax1,ax2],'Position',[.17 .11 .685 .815]);  
+ax1.Visible = 'on';% ax1.TickLabelInterpreter = 'latex'; 
+%%%%% convert pixel unit to the physical world unit %%%%%
+xticklabels(ax1, num2cell(round(um2px*ax1.XTick*10)/10, length(ax1.XTick) )' );
+yticklabels(ax1, num2cell(round(um2px*ax1.YTick*10)/10, length(ax1.YTick) )' );
+% cb2 = colorbar('Position',[.17+0.685+0.012 .11 .03 .815]); cb2.TickLabelInterpreter = 'latex';
+cb2 = colorbar('Position',[.17+0.685+0.012 .11+.128 .03 .557 ]); % cb2.TickLabelInterpreter = 'latex';
+
 
 
 
