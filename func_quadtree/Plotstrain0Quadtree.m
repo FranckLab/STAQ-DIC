@@ -57,7 +57,7 @@ strain_principal_max = 0.5*(strain_exx+strain_eyy) + strain_maxshear;
 strain_principal_min = 0.5*(strain_exx+strain_eyy) - strain_maxshear;
 % equivalent von Mises strain
 strain_vonMises = sqrt(strain_principal_max.^2 + strain_principal_min.^2 - ...
-             strain_principal_max.*strain_principal_min + 3*strain_maxshear.^2);
+             strain_principal_max.*strain_principal_min ); % there was a mistake before:   previous  "+ 3*strain_maxshear.^2" term should not be included here.
          
          
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
